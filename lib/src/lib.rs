@@ -26,7 +26,7 @@ pub struct SentenceDefinition {
 }
 
 const PROMPT_VOCAB_TEMPLATE: &str = "Please act as a Japanese to English dictionary, including the pronunciation in hiragana, explanation, An example sentence with English translations in plain text, and one image. The word is `{:word}`. Please output the result in json format, the json keys are `word`, `pronunciation`, `definition`, `examples`, and `image`. There should be no nested keys";
-const PROMPT_SENTENCE_TEMPLATE: &str = "Please act as a Japanese to English Translator including a translation and a grammar explanation. The grammar explanations should a maximum of three points, only include the most advanced points and surround the grammer components with ` to highlight them. Convert the phrase `{:sentence}`. Output the result in json format, the json keys are `sentence`, `translation` and `explanation`. Each explanation is its own element of a vector. There should be no nested keys";
+const PROMPT_SENTENCE_TEMPLATE: &str = "Please act as a Japanese to English Translator including a grammar explanation. The grammar explanations should a maximum of two points, only include the most advanced points and surround the grammer components with ^^ to highlight them. Convert the phrase `{:sentence}`. Output the result in json format, the json keys are `sentence`, `translation` and `explanation`. Each explanation is its own element of a vector. There should be no nested keys";
 
 #[async_trait(?Send)]
 pub trait Dictionary {
