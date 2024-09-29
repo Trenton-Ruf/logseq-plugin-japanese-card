@@ -72,7 +72,7 @@ async function main() {
         await logseq.Editor.insertBlock(uuid, `**Explanation:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
         await logseq.Editor.insertBlock(uuid, `${sentence.explanation[0]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
         await logseq.Editor.insertBlock(uuid, `${sentence.explanation[1]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `${sentence.explanation[2]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        //await logseq.Editor.insertBlock(uuid, `${sentence.explanation[2]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
       } catch (e) {
         await logseq.Editor.updateBlock(uuid, `${content}`)
         console.log(e)
