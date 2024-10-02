@@ -29,7 +29,7 @@ impl Dictionary for GeminiDictionary {
             }]
         });
 
-        let res_body = http_request::make_request(&url, req_body).await?;
+        let res_body = http_request::make_request(&url, req_body, None).await?;
         let dictionary = extract_word_dictionary(res_body)?;
         Ok(dictionary)
     }
@@ -48,7 +48,7 @@ impl Dictionary for GeminiDictionary {
             }]
         });
 
-        let res_body = http_request::make_request(&url, req_body).await?;
+        let res_body = http_request::make_request(&url, req_body, None).await?;
         let dictionary = extract_sentence_dictionary(res_body)?;
         Ok(dictionary)
     }

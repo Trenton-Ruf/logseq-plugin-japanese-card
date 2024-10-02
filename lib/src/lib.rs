@@ -1,8 +1,10 @@
 mod gemini_dictionary;
 mod http_request;
+mod google_tts;
 
 use async_trait::async_trait;
 use gemini_dictionary::GeminiDictionary;
+use google_tts::GoogleTTS;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -23,6 +25,13 @@ pub struct SentenceDefinition {
     translation: String,
     explanation: Vec<String>,
     //image: String,
+}
+
+#[allow(non_snake_case)]
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize)]
+pub struct EncodedAudio {
+    audioContent: String,
 }
 
 const PROMPT_VOCAB_TEMPLATE: &str = "Please act as a Japanese to English dictionary, including the pronunciation in hiragana, explanation, An example sentence with English translations in plain text, and one image. The word is `{:word}`. Please output the result in json format, the json keys are `word`, `pronunciation`, `definition`, `examples`, and `image`. There should be no nested keys";
@@ -65,3 +74,18 @@ pub async fn define_sentence(sentence: &str, api_key: &str) -> Result<JsValue, J
     Ok(serde_wasm_bindgen::to_value(&sentence_defination)?)
 }
 
+#[async_trait(?Send)]
+pub trait Synthesizer {
+    async fn synthesize_audio(&self, text: &str) -> Result< Vec<u8>, String>;
+}
+
+#[wasm_bindgen]
+pub async fn synthesize_audio(sentence: &str, api_key: &str) -> Result<JsValue, JsValue> {
+    let synthesizer = GoogleTTS::new(api_key);
+    let synthesized_audio = synthesizer
+        .synthesize_audio(sentence)
+        .await
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+
+    Ok(serde_wasm_bindgen::to_value(&synthesized_audio)?)
+}
