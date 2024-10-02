@@ -14,7 +14,7 @@ async function main() {
     description: "Google TTS API Key",
     type: "string",
     default: "",
-    title: "API key for Google Text-to-Speech",
+    title: "API key for Google Text-to-Speech Enable the text-to-speech API and create a key here: https://console.cloud.google.com/apis/credentials",
   }, {
     key: "custom_tags_vocab",
     description: "Custom tags for vocab",
