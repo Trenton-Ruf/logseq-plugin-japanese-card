@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "logseq-plugin-vocabulary-card": "file:../lib/pkg",
-    "@logseq/libs": "^0.0.17"
+    "@logseq/libs": "^0.2.0"
   },
   "logseq": {
     "id": "logseq-plugin-vocabulary-card"

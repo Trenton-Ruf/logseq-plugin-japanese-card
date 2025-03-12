@@ -4,3 +4,6 @@
 /lib/bin/
 /lib/pkg/
 /lib/wasm-pack.log
+/test_google_tts
+/plugin_test*
+/plugin/pnpm-lock.yaml
