@@ -1,5 +1,5 @@
 [package]
-name = "logseq-plugin-vocabulary-card"
+name = "logseq-plugin-japanese-card"
 version = "0.1.1"
 authors = ["Richard Hao <richard@0xdev.dev>"]
 edition = "2021"

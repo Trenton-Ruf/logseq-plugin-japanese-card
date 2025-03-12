@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  PLUGIN_NAME: logseq-plugin-vocabulary-card
+  PLUGIN_NAME: logseq-plugin-japanese-card
 
 jobs:
   build:

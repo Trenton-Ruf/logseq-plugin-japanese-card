@@ -1,5 +1,5 @@
 {
-  "name": "logseq-plugin-vocabulary-card",
+  "name": "logseq-plugin-japanese-card",
   "version": "0.1.1",
   "description": "A logseq plugin for creating vocabulary card",
   "main": "dist/index.html",
@@ -14,10 +14,10 @@
     "copy-webpack-plugin": "^5.0.0"
   },
   "dependencies": {
-    "logseq-plugin-vocabulary-card": "file:../lib/pkg",
+    "logseq-plugin-japanese-card": "file:../lib/pkg",
     "@logseq/libs": "^0.2.0"
   },
   "logseq": {
-    "id": "logseq-plugin-vocabulary-card"
+    "id": "logseq-plugin-japanese-card"
   }
 }

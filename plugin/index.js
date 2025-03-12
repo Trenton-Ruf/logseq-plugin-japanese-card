@@ -1,4 +1,4 @@
-import * as wasm from "logseq-plugin-vocabulary-card";
+import * as wasm from "logseq-plugin-japanese-card";
 import "@logseq/libs"
 
 async function main() {
@@ -29,7 +29,7 @@ async function main() {
     title: "Custom tags for grammar card",
   }])
 
-  const save_path = "../assets/storages/logseq-plugin-vocabulary-card/"
+  const save_path = "../assets/storages/logseq-plugin-japanese-card/"
   // TODO lots of repeated code under the 3 registerSlashCommand functions.
   // Separate into functions.
   
