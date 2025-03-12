@@ -13,18 +13,24 @@ use wasm_bindgen::prelude::*;
 pub struct WordDefinition {
     word: String,
     pronunciation: String,
-    definition: String,
-    examples: Vec<String>,
-    image: String,
+    definition: Vec<String>,
+    examples: Vec<Example>,
+    // image: String,
 }
 
 #[wasm_bindgen]
 #[derive(Serialize, Deserialize)]
-pub struct SentenceDefinition {
-    sentence: String,
-    translation: String,
-    explanation: Vec<String>,
+pub struct GrammarDefinition {
+    grammar: String,
+    explanations: Vec<String>,
+    examples: Vec<Example>,
     //image: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Example {
+    pub japanese: String,
+    pub english: String,
 }
 
 #[allow(non_snake_case)]
@@ -34,8 +40,51 @@ pub struct EncodedAudio {
     audioContent: String,
 }
 
-const PROMPT_VOCAB_TEMPLATE: &str = "Please act as a Japanese to English dictionary, including the pronunciation in hiragana, explanation, An example sentence with English translations in plain text, and one image. The word is `{:word}`. Please output the result in json format, the json keys are `word`, `pronunciation`, `definition`, `examples`, and `image`. There should be no nested keys";
-const PROMPT_SENTENCE_TEMPLATE: &str = "Please act as a Japanese to English Translator including a grammar explanation. The grammar explanations should a maximum of two points, only include the most advanced points and surround the grammer components with ^^ to highlight them. Convert the phrase `{:sentence}`. Output the result in json format, the json keys are `sentence`, `translation` and `explanation`. Each explanation is its own element of a vector. There should be no nested keys";
+
+
+const PROMPT_VOCAB_TEMPLATE: &str = "Please act as a Japanese to English dictionary, including the pronunciation in hiragana, explanation, and example grammars with English translations. \
+The word is `{:word}`. Please output the result in json format, the json keys are `word`, `pronunciation`, `definition`, and `examples`.\n\
+please limit the number of definitions and examples to the most important ones. \
+`word` should be just the dictionary form. Do not include romaji. \n\
+{\n\
+    \"word\": \"Placeholder word\",\n\
+    \"pronunciation\": \"Placeholder pronunciation\",\n\
+    \"definition\": [\n\
+        \"Placeholder definition 1\",\n\
+        \"Placeholder definition 2\"\n\
+    ],\n\
+    \"examples\": [\n\
+        {\n\
+            \"japanese\": \"Placeholder Japanese grammar 1.\",\n\
+            \"english\": \"Placeholder English translation 1.\"\n\
+            \"japanese\": \"Placeholder Japanese grammar 2.\",\n\
+            \"english\": \"Placeholder English translation 2.\"\n\
+        }\n\
+    ]\n\
+}\n\
+Only output a json code block";
+
+
+const PROMPT_GRAMMAR_TEMPLATE: &str = "Please act as a Japanese to English Dictionary. Please explain the grammar point: `{:grammar}`. \
+Output the result in json format, the json keys are `grammar`, `explanations`, and `examples`. Each explanation is its own element of a vector. \
+please limit the number of explanations and examples to the most important ones. \
+Surround any words with ^^ to highlight them as you see fit. Do not include romaji.\n\
+{\n\
+    \"grammar\": \"Placeholder grammar\",\n\
+    \"explanations\": [\n\
+        \"Placeholder explanation 1\",\n\
+        \"Placeholder explanation 2\"\n\
+    ],\n\
+    \"examples\": [\n\
+        {\n\
+            \"japanese\": \"Placeholder Japanese example sentence 1.\",\n\
+            \"english\": \"Placeholder English translation 1.\"\n\
+            \"japanese\": \"Placeholder Japanese example sentence 2.\",\n\
+            \"english\": \"Placeholder English translation 2.\"\n\
+        }\n\
+    ]\n\
+}\n\
+Only output a json code block";
 
 #[async_trait(?Send)]
 pub trait Dictionary {
@@ -46,9 +95,9 @@ pub trait Dictionary {
         PROMPT_VOCAB_TEMPLATE.replace("{:word}", word.trim())
     }
 
-    async fn define_sentence(&self, sentence: &str) -> Result<SentenceDefinition, String>;
-    fn default_sentence_prompt(&self, sentence: &str) -> String {
-        PROMPT_SENTENCE_TEMPLATE.replace("{:sentence}", sentence.trim())
+    async fn define_grammar(&self, grammar: &str) -> Result<GrammarDefinition, String>;
+    fn default_grammar_prompt(&self, grammar: &str) -> String {
+        PROMPT_GRAMMAR_TEMPLATE.replace("{:grammar}", grammar.trim())
     }
 }
 
@@ -64,14 +113,14 @@ pub async fn define_word(word: &str, api_key: &str) -> Result<JsValue, JsValue> 
 }
 
 #[wasm_bindgen]
-pub async fn define_sentence(sentence: &str, api_key: &str) -> Result<JsValue, JsValue> {
+pub async fn define_grammar(grammar: &str, api_key: &str) -> Result<JsValue, JsValue> {
     let dictionary = GeminiDictionary::new(api_key);
-    let sentence_defination = dictionary
-        .define_sentence(sentence)
+    let grammar_defination = dictionary
+        .define_grammar(grammar)
         .await
         .map_err(|e| JsValue::from_str(&e))?;
 
-    Ok(serde_wasm_bindgen::to_value(&sentence_defination)?)
+    Ok(serde_wasm_bindgen::to_value(&grammar_defination)?)
 }
 
 #[async_trait(?Send)]
@@ -80,10 +129,10 @@ pub trait Synthesizer {
 }
 
 #[wasm_bindgen]
-pub async fn synthesize_audio(sentence: &str, api_key: &str) -> Result<JsValue, JsValue> {
+pub async fn synthesize_audio(grammar: &str, api_key: &str) -> Result<JsValue, JsValue> {
     let synthesizer = GoogleTTS::new(api_key);
     let synthesized_audio = synthesizer
-        .synthesize_audio(sentence)
+        .synthesize_audio(grammar)
         .await
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
 

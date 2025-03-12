@@ -57,18 +57,22 @@ async function main() {
         const word = await wasm.define_word(content, gemini_ai_api_key)
         await logseq.Editor.updateBlock(uuid, `${word.word} #card ${custom_tags}`);
         await logseq.Editor.insertBlock(uuid, `*${word.pronunciation}*`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `**${word.definition}**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        for (const definition of word.definition) {
+          await logseq.Editor.insertBlock(uuid, `${definition}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        }
 
         // TTS Here
         const s = logseq.Assets.makeSandboxStorage()
-        const audio = await wasm.synthesize_audio(content, google_tts_api_key)
-        const audio_typedArray = await new Uint8Array(audio);
+        const audio = await wasm.synthesize_audio(word.word, google_tts_api_key)
+        const audio_typedArray = new Uint8Array(audio);
         await s.setItem(content + `.mp3`, audio_typedArray) // save TTS
         await logseq.Editor.insertBlock(uuid, `![`+content+`.mp3](`+save_path+content+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
 
-        await logseq.Editor.insertBlock(uuid, `**Example:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `${word.examples[0]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `${word.examples[1]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        for (const example of word.examples) {
+          await logseq.Editor.insertBlock(uuid, `- ${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          await logseq.Editor.insertBlock(uuid, `- ${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        }
 
       } catch (e) {
         console.log(e)
@@ -99,21 +103,26 @@ async function main() {
       await logseq.Editor.updateBlock(uuid, `${content} loading...`)
 
       try {
-        const sentence = await wasm.define_sentence(content, gemini_ai_api_key)
-        await logseq.Editor.updateBlock(uuid, `${sentence.sentence} #card ${custom_tags}`);
-        await logseq.Editor.insertBlock(uuid, `*${sentence.translation}*`, { before: false, sibling: false, focus: false, isPageBlock: false })
-
-        // TTS HERE
-        const s = logseq.Assets.makeSandboxStorage()
-        const audio = await wasm.synthesize_audio(content, google_tts_api_key)
-        const audio_typedArray = await new Uint8Array(audio);
-        await s.setItem(content + `.mp3`, audio_typedArray) // save TTS
-        await logseq.Editor.insertBlock(uuid, `![`+content+`.mp3](`+save_path+content+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
-
+        const grammar = await wasm.define_grammar(content, gemini_ai_api_key)
+        await logseq.Editor.updateBlock(uuid, `${grammar.grammar} #card ${custom_tags}`);
         await logseq.Editor.insertBlock(uuid, `**Explanation:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `${sentence.explanation[0]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        await logseq.Editor.insertBlock(uuid, `${sentence.explanation[1]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        //await logseq.Editor.insertBlock(uuid, `${sentence.explanation[2]}`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        for (const explanation of grammar.explanations) {
+          await logseq.Editor.insertBlock(uuid, `${explanation}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        }
+
+        const s = logseq.Assets.makeSandboxStorage()
+
+        await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        for (const example of grammar.examples) {
+          await logseq.Editor.insertBlock(uuid, `- ${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          await logseq.Editor.insertBlock(uuid, `- ${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+
+            const sanitizedFilename = example.japanese.replace(/\^/g, '');
+            const audio = await wasm.synthesize_audio(example.japanese, google_tts_api_key)
+            const audio_typedArray = new Uint8Array(audio);
+            await s.setItem(sanitizedFilename + `.mp3`, audio_typedArray) // save TTS
+            await logseq.Editor.insertBlock(uuid, `![`+sanitizedFilename+`.mp3](`+save_path+sanitizedFilename+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        }
       } catch (e) {
         console.log(e)
         logseq.App.showMsg("Failed to generate grammar card." + e)
