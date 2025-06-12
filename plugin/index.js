@@ -1,6 +1,14 @@
 import * as wasm from "logseq-plugin-japanese-card";
 import "@logseq/libs"
 
+function sanitizeText(text) {
+  const specialCharsToRemove = /[\^\*\=\_]|\[.*?\]|\n/g;
+  const sanitizedText = text.replace(specialCharsToRemove, '');
+  console.log("sanitizedText:", sanitizedText);
+  return sanitizedText
+}
+
+
 async function main() {
 
   logseq.useSettingsSchema([{
@@ -68,10 +76,10 @@ async function main() {
         await s.setItem(content + `.mp3`, audio_typedArray) // save TTS
         await logseq.Editor.insertBlock(uuid, `![`+content+`.mp3](`+save_path+content+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
 
-        await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        const exampleBlock = await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
         for (const example of word.examples) {
-          await logseq.Editor.insertBlock(uuid, `- ${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
-          await logseq.Editor.insertBlock(uuid, `- ${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          await logseq.Editor.insertBlock(exampleBlock.uuid, `${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          await logseq.Editor.insertBlock(exampleBlock.uuid, `${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
         }
 
       } catch (e) {
@@ -104,25 +112,39 @@ async function main() {
 
       try {
         const grammar = await wasm.define_grammar(content, gemini_ai_api_key)
-        await logseq.Editor.updateBlock(uuid, `${grammar.grammar} #card ${custom_tags}`);
-        await logseq.Editor.insertBlock(uuid, `**Explanation:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        for (const explanation of grammar.explanations) {
-          await logseq.Editor.insertBlock(uuid, `${explanation}`, { before: false, sibling: false, focus: false, isPageBlock: false });
-        }
 
         const s = logseq.Assets.makeSandboxStorage()
 
-        await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
-        for (const example of grammar.examples) {
-          await logseq.Editor.insertBlock(uuid, `- ${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
-          await logseq.Editor.insertBlock(uuid, `- ${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        await logseq.Editor.updateBlock(uuid, `${grammar.examples[0].japanese} #card ${custom_tags}`);
+        await logseq.Editor.insertBlock(uuid, `${grammar.examples[0].english}`, { before: false, sibling: false, focus: false, isPageBlock: false })
 
-            const sanitizedFilename = example.japanese.replace(/\^/g, '');
-            const audio = await wasm.synthesize_audio(example.japanese, google_tts_api_key)
-            const audio_typedArray = new Uint8Array(audio);
-            await s.setItem(sanitizedFilename + `.mp3`, audio_typedArray) // save TTS
-            await logseq.Editor.insertBlock(uuid, `![`+sanitizedFilename+`.mp3](`+save_path+sanitizedFilename+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
+        // TTS Here
+        // Remove special chars from the audio and filename
+        const sanitizedFilename = sanitizeText( grammar.examples[0].japanese )
+        const audio = await wasm.synthesize_audio(sanitizedFilename, google_tts_api_key)
+        const audio_typedArray = new Uint8Array(audio);
+        await s.setItem(sanitizedFilename + `.mp3`, audio_typedArray)
+        await logseq.Editor.insertBlock(uuid, `![`+sanitizedFilename+`.mp3](`+save_path+sanitizedFilename+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false });
+
+        await logseq.Editor.insertBlock(uuid, grammar.grammar, { before: false, 
+          sibling: false, focus: false, isPageBlock: false , properties: {'heading':'3', 'background-color':"pink"}}
+        )
+  
+        const explanationBlock = await logseq.Editor.insertBlock(uuid, `**Explanation:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        for (const explanation of grammar.explanations) {
+            await logseq.Editor.insertBlock(explanationBlock.uuid, `${explanation}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          }
+
+        if (grammar.examples.length > 1 ){
+          const exampleBlock = await logseq.Editor.insertBlock(uuid, `**Examples:**`, { before: false, sibling: false, focus: false, isPageBlock: false })
+
+          for (let i = 1; i < grammar.examples.length; i++) {
+            const example = grammar.examples[i];
+            await logseq.Editor.insertBlock(exampleBlock.uuid, `${example.japanese}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+            await logseq.Editor.insertBlock(exampleBlock.uuid, `${example.english}`, { before: false, sibling: false, focus: false, isPageBlock: false });
+          }
         }
+
       } catch (e) {
         console.log(e)
         logseq.App.showMsg("Failed to generate grammar card." + e)
@@ -146,10 +168,12 @@ async function main() {
       await logseq.Editor.updateBlock(uuid, `${content} loading...`)
 
       try {
-        const audio = await wasm.synthesize_audio(content, google_tts_api_key)
+
+        const sanitizedContent = sanitizeText( content )
+        const audio = await wasm.synthesize_audio(sanitizedContent, google_tts_api_key)
         const audio_typedArray = await new Uint8Array(audio);
-        await s.setItem(content + `.mp3`, audio_typedArray) // save TTS
-        await logseq.Editor.insertBlock(uuid, `![`+content+`.mp3](`+save_path+content+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false })
+        await s.setItem(sanitizedContent + `.mp3`, audio_typedArray) // save TTS
+        await logseq.Editor.insertBlock(uuid, `![`+sanitizedContent+`.mp3](`+save_path+sanitizedContent+`.mp3)`, { before: false, sibling: false, focus: false, isPageBlock: false })
       } catch (e) {
         console.log(e)
         logseq.App.showMsg("Failed to generate vocabulary card." + e)

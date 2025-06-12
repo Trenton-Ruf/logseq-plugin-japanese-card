@@ -36,7 +36,8 @@ impl Dictionary for GeminiDictionary {
 
     async fn define_grammar(&self, grammar: &str) -> Result<GrammarDefinition, String> {
         let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={}",
+            // "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={}",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key={}",
             self.api_key
         );
         let req_body = serde_json::json!({

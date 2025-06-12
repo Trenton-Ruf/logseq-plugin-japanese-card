@@ -65,10 +65,12 @@ please limit the number of definitions and examples to the most important ones. 
 Only output a json code block";
 
 
-const PROMPT_GRAMMAR_TEMPLATE: &str = "Please act as a Japanese to English Dictionary. Please explain the grammar point: `{:grammar}`. \
-Output the result in json format, the json keys are `grammar`, `explanations`, and `examples`. Each explanation is its own element of a vector. \
-please limit the number of explanations and examples to the most important ones. \
-Surround any words with ^^ to highlight them as you see fit. Do not include romaji.\n\
+const PROMPT_GRAMMAR_TEMPLATE: &str = "Please act as a Japanese to English Dictionary. Please explain the grammar point: `{:grammar}`.
+Output the result in json format, the json keys are `grammar`, `explanations`, and `examples`. Each explanation is its own element of a vector.
+please limit the number of explanations and examples to the most important ones.
+Use standard markdown sytax for bold and italics, and surround any words with ^^ to highlight them.
+Limit highlights to the explanation and do so sparingly. Bold the grammar point in the and examples.
+For furigana use brackets after the word, for example: 漢字[かんじ]. Do not include romaji ANYWHERE.\n\
 {\n\
     \"grammar\": \"Placeholder grammar\",\n\
     \"explanations\": [\n\
