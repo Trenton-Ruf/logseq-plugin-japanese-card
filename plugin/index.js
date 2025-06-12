@@ -2,7 +2,7 @@ import * as wasm from "logseq-plugin-japanese-card";
 import "@logseq/libs"
 
 function sanitizeText(text) {
-  const specialCharsToRemove = /[\^\*\=\_]|\[.*?\]|\n/g;
+  const specialCharsToRemove = /[\^\*\=\_]|\[.*?\]|\s/g;
   const sanitizedText = text.replace(specialCharsToRemove, '');
   console.log("sanitizedText:", sanitizedText);
   return sanitizedText
