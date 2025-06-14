@@ -70,7 +70,7 @@ Output the result in json format, the json keys are `grammar`, `explanations`, a
 please limit the number of explanations and examples to the most important ones.
 Use standard markdown sytax for bold and italics, and surround any words with double carets to ^^highlight^^ them.
 Limit highlights to the explanation and do so sparingly. Bold the grammar point: `{:grammar}` in the explanation and examples.
-For furigana use add brackets after the word AND add SPACES before and after, for example: `授業[じゅぎょう] しているうちに、 宿題[しゅくだい] を 完成[かんせい] した。`.
+For furigana use add a space before the word and the furigana in brackets after the word, for example: ` 授業[じゅぎょう]しているうちに、 宿題[しゅくだい]を 完成[かんせい]した。`.
 Use furigana for advanced words ONLY (Starting at JLPT N2). DO NOT use furigana for basic words.
 Do NOT include romaji ANYWHERE.\n\
 {\n\
