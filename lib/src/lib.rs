@@ -65,12 +65,13 @@ please limit the number of definitions and examples to the most important ones. 
 Only output a json code block";
 
 
-const PROMPT_GRAMMAR_TEMPLATE: &str = "Please act as a Japanese to English Dictionary. Please explain the grammar point: `{:grammar}`.
+const PROMPT_GRAMMAR_TEMPLATE: &str = "Please act as a Japanese to English Dictionary. Please explain the grammar point in English: `{:grammar}`.
 Output the result in json format, the json keys are `grammar`, `explanations`, and `examples`. Each explanation is its own element of a vector.
 please limit the number of explanations and examples to the most important ones.
 Use standard markdown sytax for bold and italics, and surround any words with double carets to ^^highlight^^ them.
 Limit highlights to the explanation and do so sparingly. Bold the grammar point: `{:grammar}` in the explanation and examples.
-For furigana use add a space before the word and the furigana in brackets after the word, for example: ` 授業[じゅぎょう]しているうちに、 宿題[しゅくだい]を 完成[かんせい]した。`.
+Make sure to add a space AFTER the furigana in brackets, and if a word with furigana is directly after a ”、” then add a space before the word as well.
+For example: `授業[じゅぎょう] しているうちに、  宿題[しゅくだい] を完成[かんせい] した。`.
 Use furigana for advanced words ONLY (Starting at JLPT N2). DO NOT use furigana for basic words.
 Do NOT include romaji ANYWHERE.\n\
 {\n\
